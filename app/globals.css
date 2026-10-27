@@ -1,0 +1,225 @@
+:root {
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --text: #000000;
+  --secondary: #8e8e93;
+  --separator: rgba(60, 60, 67, 0.16);
+  --fill: rgba(118, 118, 128, 0.12);
+  --blue: #007aff;
+  --red: #ff3b30;
+  --green: #34c759;
+  --tabbar: rgba(249, 249, 249, 0.94);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --card: #1c1c1e;
+    --text: #ffffff;
+    --secondary: #8e8e93;
+    --separator: rgba(84, 84, 88, 0.6);
+    --fill: rgba(118, 118, 128, 0.24);
+    --blue: #0a84ff;
+    --red: #ff453a;
+    --green: #30d158;
+    --tabbar: rgba(29, 29, 31, 0.94);
+  }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 16px calc(90px + env(safe-area-inset-bottom));
+}
+
+.large-title {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.37px;
+  margin: 0;
+  padding: 48px 0 12px;
+}
+
+.section-header {
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--secondary);
+  letter-spacing: -0.08px;
+  margin: 24px 16px 8px;
+}
+
+/* ---- grouped cards ---- */
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 16px;
+  position: relative;
+}
+.row + .row::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 16px; right: 0;
+  height: 0.5px;
+  background: var(--separator);
+}
+.row .label { flex: 1; }
+.row .value { color: var(--secondary); }
+
+.row input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-align: right;
+  padding: 0;
+}
+.row input[type="text"] { text-align: left; }
+.row input::placeholder { color: var(--secondary); }
+.row input[type="file"] { font-size: 15px; color: var(--secondary); }
+.row input[type="file"]::file-selector-button {
+  font: inherit; color: var(--blue); background: var(--fill);
+  border: none; border-radius: 8px; padding: 4px 10px; margin-right: 8px;
+}
+
+/* ---- buttons ---- */
+.btn {
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue);
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 16px;
+  cursor: pointer;
+}
+.btn:disabled { opacity: 0.5; }
+.btn:active { opacity: 0.8; }
+
+.link {
+  font: inherit;
+  color: var(--red);
+  background: none;
+  border: none;
+  padding: 4px 0 4px 8px;
+  cursor: pointer;
+}
+
+/* ---- lists ---- */
+.list .row { padding: 12px 16px; }
+.list .row .label strong { font-weight: 600; display: block; }
+.list .row .label small { color: var(--secondary); font-size: 15px; }
+.thumb {
+  width: 56px; height: 56px; border-radius: 10px; object-fit: cover; display: block;
+  background: var(--fill);
+}
+.empty { color: var(--secondary); text-align: center; padding: 24px 16px; }
+
+/* ---- stats ---- */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.tile small { color: var(--secondary); font-size: 13px; font-weight: 600; text-transform: uppercase; }
+.tile strong { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; }
+.tile.accent strong { color: var(--blue); }
+.chart-card { padding: 16px 8px 8px 0; }
+
+/* ---- tab bar ---- */
+.tabbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  background: var(--tabbar);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid var(--separator);
+}
+.tabbar button {
+  flex: 1;
+  max-width: 120px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font: inherit; font-size: 10px; font-weight: 500;
+  color: var(--secondary);
+  background: none; border: none; cursor: pointer;
+}
+.tabbar button.active { color: var(--blue); }
+.tabbar svg { width: 26px; height: 26px; }
+
+.error {
+  background: var(--card);
+  color: var(--red);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+/* ---- informe / impresión ---- */
+.report {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+.report h1 { font-size: 28px; font-weight: 700; margin: 0 0 4px; }
+.report h2 {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  font-size: 15px; font-weight: 600; text-transform: capitalize;
+  color: var(--secondary); margin: 28px 0 8px;
+  padding-bottom: 6px; border-bottom: 0.5px solid var(--separator);
+}
+.report-weight { text-transform: none; color: var(--blue); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media print { .report-weight { color: #000; } }
+.report-meta { color: var(--secondary); font-size: 14px; margin: 0; }
+.report-toolbar { margin-bottom: 24px; }
+.report-footer { display: flex; justify-content: center; margin-top: 40px; }
+.report-footer .btn { width: auto; min-width: 240px; margin-top: 0; }
+.report table { width: 100%; border-collapse: collapse; }
+.report td { padding: 8px 8px 8px 0; vertical-align: middle; border-bottom: 0.5px solid var(--separator); }
+.report tr:last-child td { border-bottom: none; }
+.report-time { width: 70px; color: var(--secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.report-img { width: 168px; text-align: right; }
+.report-img img { width: 160px; height: 160px; object-fit: cover; border-radius: 10px; display: block; margin-left: auto; }
+.report-empty { text-align: center; color: var(--secondary); padding: 48px 16px; }
+.report-day { break-inside: avoid; }
+
+@media print {
+  :root { --bg: #fff; --card: #fff; --text: #000; --secondary: #555; --separator: #ccc; }
+  html, body { background: #fff; color: #000; }
+  .no-print { display: none !important; }
+  .report { max-width: none; padding: 0; }
+  .report h2 { break-after: avoid; }
+  .report tr { break-inside: avoid; }
+  @page { margin: 18mm; }
+}
+
+.title-row { display: flex; align-items: baseline; justify-content: space-between; }
+.toolbar-link { color: var(--blue); text-decoration: none; font-size: 17px; }
