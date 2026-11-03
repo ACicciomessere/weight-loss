@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { COOKIE, isValidToken } from "@/lib/auth";
+import { COOKIE, userForToken } from "@/lib/auth";
 
 export async function GET(request) {
   const k = request.nextUrl.searchParams.get("k");
-  if (!isValidToken(k)) return new NextResponse(null, { status: 404 });
+  if (!userForToken(k)) return new NextResponse(null, { status: 404 });
 
   const res = NextResponse.redirect(new URL("/", request.url));
   res.cookies.set(COOKIE, k, {

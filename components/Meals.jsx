@@ -2,25 +2,36 @@
 
 import { useState } from "react";
 import * as api from "@/lib/api";
-import { nowLocal, fmt } from "@/lib/util";
+import { nowLocal, fmt, SATIETY_LABELS } from "@/lib/util";
 
 export default function Meals({ meals, onChange }) {
   const [desc, setDesc] = useState("");
   const [at, setAt] = useState(nowLocal());
+  const [satiety, setSatiety] = useState(null);
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(null);
 
   async function submit(e) {
     e.preventDefault();
     if (!desc.trim()) return;
+    if (!satiety) {
+      setErr("Elegí el nivel de saciedad");
+      return;
+    }
     setBusy(true);
+    setErr(null);
+    const form = e.currentTarget;
     try {
-      await api.addMeal(desc.trim(), new Date(at).toISOString(), file);
+      await api.addMeal(desc.trim(), new Date(at).toISOString(), satiety, file);
       setDesc("");
+      setSatiety(null);
       setFile(null);
       setAt(nowLocal());
-      e.target.reset();
+      form.reset();
       await onChange();
+    } catch (error) {
+      setErr(error.message);
     } finally {
       setBusy(false);
     }
@@ -61,6 +72,30 @@ export default function Meals({ meals, onChange }) {
               required
             />
           </label>
+          <div className="row">
+            <span className="label">
+              Saciedad
+              {satiety && <small className="scale-hint">{SATIETY_LABELS[satiety]}</small>}
+            </span>
+            <div className="scale" role="radiogroup" aria-label="Nivel de saciedad">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  role="radio"
+                  aria-checked={satiety === n}
+                  title={SATIETY_LABELS[n]}
+                  className={satiety === n ? "on" : ""}
+                  onClick={() => {
+                    setSatiety(n);
+                    setErr(null);
+                  }}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
           <label className="row">
             <span className="label">Foto</span>
             <input
@@ -71,6 +106,7 @@ export default function Meals({ meals, onChange }) {
             />
           </label>
         </div>
+        {err && <p className="form-error">{err}</p>}
         <button className="btn" disabled={busy}>
           {busy ? "Subiendo…" : "Agregar"}
         </button>
@@ -87,7 +123,10 @@ export default function Meals({ meals, onChange }) {
             )}
             <span className="label">
               <strong>{m.description}</strong>
-              <small>{fmt(m.eaten_at)}</small>
+              <small>
+                {fmt(m.eaten_at)}
+                {m.satiety != null && ` · Saciedad ${m.satiety}/5`}
+              </small>
             </span>
             <button className="link" onClick={() => remove(m)}>Eliminar</button>
           </div>

@@ -17,22 +17,72 @@ const dayLabel = (key) =>
     year: "numeric",
   });
 
+const shortDate = (key) =>
+  new Date(key + "T12:00:00").toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+const today = () => new Date().toLocaleDateString("sv-SE");
+
+// ?desde=YYYY-MM-DD en la URL, para que recargar mantenga el filtro.
+function initialFrom() {
+  const v = new URLSearchParams(window.location.search).get("desde");
+  return v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : "";
+}
+
 export default function Report() {
+  const [from, setFrom] = useState(initialFrom); // "" = todo
   const [meals, setMeals] = useState(null);
   const [weights, setWeights] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    Promise.all([api.getMeals(), api.getWeights()])
+    const url = new URL(window.location.href);
+    if (from) url.searchParams.set("desde", from);
+    else url.searchParams.delete("desde");
+    window.history.replaceState(null, "", url);
+
+    // medianoche local del día elegido
+    const fromIso = from ? new Date(from + "T00:00:00").toISOString() : undefined;
+    let cancelled = false;
+    setMeals(null);
+    Promise.all([api.getMeals(fromIso), api.getWeights(fromIso)])
       .then(([m, w]) => {
+        if (cancelled) return;
         setMeals(m);
         setWeights(w);
+        setError(null);
       })
-      .catch((e) => setError(e.message));
-  }, []);
+      .catch((e) => !cancelled && setError(e.message));
+    return () => {
+      cancelled = true;
+    };
+  }, [from]);
 
-  if (error) return <p className="report-empty">{error}</p>;
-  if (!meals) return <p className="report-empty">Cargando…</p>;
+  const toolbar = (
+    <div className="report-toolbar no-print">
+      <Link href="/" className="toolbar-link">‹ Volver</Link>
+      <label className="report-from">
+        Desde
+        <input
+          type="date"
+          value={from}
+          max={today()}
+          onChange={(e) => setFrom(e.target.value)}
+        />
+        {from && (
+          <button type="button" onClick={() => setFrom("")}>
+            Todo
+          </button>
+        )}
+      </label>
+    </div>
+  );
+
+  if (error) return <div className="report">{toolbar}<p className="report-empty">{error}</p></div>;
+  if (!meals) return <div className="report">{toolbar}<p className="report-empty">Cargando…</p></div>;
 
   const generated = new Date().toLocaleString("es-AR", {
     day: "2-digit",
@@ -54,12 +104,11 @@ export default function Report() {
 
   return (
     <div className="report">
-      <div className="report-toolbar no-print">
-        <Link href="/" className="toolbar-link">‹ Volver</Link>
-      </div>
+      {toolbar}
 
       <h1>Resumen</h1>
       <p className="report-meta">
+        {from ? `Desde el ${shortDate(from)} · ` : ""}
         Generado el {generated} · {meals.length} comidas · {weights.length} registros de peso
       </p>
 
@@ -82,6 +131,9 @@ export default function Report() {
                     <tr key={m.id}>
                       <td className="report-time">{time(m.eaten_at)}</td>
                       <td className="report-desc">{m.description}</td>
+                      <td className="report-sat">
+                        {m.satiety != null && `Saciedad ${m.satiety}/5`}
+                      </td>
                       <td className="report-img">
                         {m.image_url && <img src={m.image_url} alt="" />}
                       </td>
@@ -93,7 +145,7 @@ export default function Report() {
           </section>
         );
       })}
-      {keys.length === 0 && <p className="report-empty">Sin registros.</p>}
+      {keys.length === 0 && <p className="report-empty">Sin registros{from ? " desde esa fecha" : ""}.</p>}
 
       <div className="report-footer no-print">
         <button className="btn" onClick={() => window.print()}>
