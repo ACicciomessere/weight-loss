@@ -21,7 +21,8 @@ create table meals (
   id          bigint generated always as identity primary key,
   user_id     text not null references users(id),
   description text not null check (char_length(description) <= 500),
-  satiety     smallint check (satiety between 1 and 5),
+  hunger      smallint check (hunger between 1 and 5),   -- hambre al llegar (opcional)
+  satiety     smallint check (satiety between 1 and 5),  -- saciedad después (opcional)
   eaten_at    timestamptz not null default now(),
   image_path  text   -- path dentro del bucket privado; la URL se firma en el servidor
 );

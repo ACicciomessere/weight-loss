@@ -16,8 +16,8 @@ yarn dev
 
 Base de datos: correr `supabase/schema.sql` en el SQL Editor si arrancás de cero.
 Si ya tenías la base, correr las migraciones que falten, en orden:
-`migrate-from-v1.sql` (solo desde la v1) y `migrate-users-satiety.sql` (usuarios y saciedad;
-asigna todos los datos existentes a `user1`).
+`migrate-from-v1.sql` (solo desde la v1), `migrate-users-satiety.sql` (usuarios y saciedad;
+asigna todos los datos existentes a `user1`) y `migrate-hunger.sql` (nivel de hambre).
 
 Deploy: importar el repo en Vercel y cargar las variables de `.env.example`
 en Environment Variables.

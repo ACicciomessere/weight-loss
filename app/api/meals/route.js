@@ -9,6 +9,13 @@ const fail = (e) => NextResponse.json({ error: e.message }, { status: 400 });
 const ALLOWED = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/heic": "heic", "image/gif": "gif" };
 const MAX_BYTES = 10 * 1024 * 1024;
 
+// Campo opcional 1–5: null si no vino, undefined si es inválido.
+function scale(value) {
+  if (value == null || value === "") return null;
+  const n = Number(value);
+  return Number.isInteger(n) && n >= 1 && n <= 5 ? n : undefined;
+}
+
 export async function GET(request) {
   try {
     const user = getUser(request.cookies);
@@ -36,11 +43,12 @@ export async function POST(request) {
     const form = await request.formData();
     const description = String(form.get("description") ?? "").trim().slice(0, 500);
     const eaten_at = form.get("eaten_at");
-    const satiety = Number(form.get("satiety"));
+    const hunger = scale(form.get("hunger"));
+    const satiety = scale(form.get("satiety"));
     const file = form.get("file");
     if (!description || !eaten_at) return fail(new Error("Datos inválidos"));
-    if (!Number.isInteger(satiety) || satiety < 1 || satiety > 5) {
-      return fail(new Error("La saciedad tiene que ser de 1 a 5"));
+    if (hunger === undefined || satiety === undefined) {
+      return fail(new Error("Hambre y saciedad tienen que ser de 1 a 5"));
     }
 
     let image_path = null;
@@ -55,7 +63,7 @@ export async function POST(request) {
 
     const { error } = await db()
       .from("meals")
-      .insert({ user_id: user, description, satiety, eaten_at, image_path });
+      .insert({ user_id: user, description, hunger, satiety, eaten_at, image_path });
     if (error) return fail(error);
     return NextResponse.json({ ok: true });
   } catch (e) {

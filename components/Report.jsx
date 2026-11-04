@@ -132,7 +132,8 @@ export default function Report() {
                       <td className="report-time">{time(m.eaten_at)}</td>
                       <td className="report-desc">{m.description}</td>
                       <td className="report-sat">
-                        {m.satiety != null && `Saciedad ${m.satiety}/5`}
+                        {m.hunger != null && <div>Hambre {m.hunger}/5</div>}
+                        {m.satiety != null && <div>Saciedad {m.satiety}/5</div>}
                       </td>
                       <td className="report-img">
                         {m.image_url && <img src={m.image_url} alt="" />}

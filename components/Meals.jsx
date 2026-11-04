@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import * as api from "@/lib/api";
-import { nowLocal, fmt, SATIETY_LABELS } from "@/lib/util";
+import { nowLocal, fmt, scalesText, HUNGER_LABELS, SATIETY_LABELS } from "@/lib/util";
+import ScaleInput from "./ScaleInput";
 
 export default function Meals({ meals, onChange }) {
   const [desc, setDesc] = useState("");
   const [at, setAt] = useState(nowLocal());
+  const [hunger, setHunger] = useState(null);
   const [satiety, setSatiety] = useState(null);
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -15,16 +17,13 @@ export default function Meals({ meals, onChange }) {
   async function submit(e) {
     e.preventDefault();
     if (!desc.trim()) return;
-    if (!satiety) {
-      setErr("Elegí el nivel de saciedad");
-      return;
-    }
     setBusy(true);
     setErr(null);
     const form = e.currentTarget;
     try {
-      await api.addMeal(desc.trim(), new Date(at).toISOString(), satiety, file);
+      await api.addMeal(desc.trim(), new Date(at).toISOString(), { hunger, satiety }, file);
       setDesc("");
+      setHunger(null);
       setSatiety(null);
       setFile(null);
       setAt(nowLocal());
@@ -72,30 +71,8 @@ export default function Meals({ meals, onChange }) {
               required
             />
           </label>
-          <div className="row">
-            <span className="label">
-              Saciedad
-              {satiety && <small className="scale-hint">{SATIETY_LABELS[satiety]}</small>}
-            </span>
-            <div className="scale" role="radiogroup" aria-label="Nivel de saciedad">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  role="radio"
-                  aria-checked={satiety === n}
-                  title={SATIETY_LABELS[n]}
-                  className={satiety === n ? "on" : ""}
-                  onClick={() => {
-                    setSatiety(n);
-                    setErr(null);
-                  }}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-          </div>
+          <ScaleInput label="Hambre antes" labels={HUNGER_LABELS} value={hunger} onChange={setHunger} />
+          <ScaleInput label="Saciedad después" labels={SATIETY_LABELS} value={satiety} onChange={setSatiety} />
           <label className="row">
             <span className="label">Foto</span>
             <input
@@ -125,7 +102,7 @@ export default function Meals({ meals, onChange }) {
               <strong>{m.description}</strong>
               <small>
                 {fmt(m.eaten_at)}
-                {m.satiety != null && ` · Saciedad ${m.satiety}/5`}
+                {scalesText(m) && ` · ${scalesText(m)}`}
               </small>
             </span>
             <button className="link" onClick={() => remove(m)}>Eliminar</button>
